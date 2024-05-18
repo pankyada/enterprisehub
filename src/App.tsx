@@ -1,9 +1,13 @@
 import './App.css'
+import './index.css'
 import { useState, useEffect } from 'react';
 import { Navigation } from './components/navigation'
 // import { Switch } from "@/components/ui/switch"
 import { Checkbox } from './components/ui/checkbox';
-import ChatBot from './components/ChatBot';
+import GraphBrowser from './components/GraphBrowser';
+import { Input } from './components/ui/input';
+import { Button } from './components/ui/button';
+// import ChatBot from './components/ChatBot';
 
 
 
@@ -65,6 +69,8 @@ function App() {
   }, []);
 
 
+  const [app, setApp] = useState<string>("");
+
   const handleSave = () => {
     localStorage.setItem('selectedComponents', JSON.stringify(selectedComponents));
     setIsFirstTime(false);
@@ -106,8 +112,24 @@ function App() {
   return (
     <>
       {isFirstTime && firstTimeDialog}
-      <Navigation selectedComponents={selectedComponents} />
-      <ChatBot />
+      <Navigation selectedComponents={selectedComponents} setApp={setApp} />
+      {
+        app === "Graph" ? (
+
+          <div className='grid grid-rows-12 grid-flow-col h-lvh'>
+            <h1 className="text-2xl font-bold text-center row-span-1">NFR Graph Reporting</h1>
+            <div className="flex w-full items-center justify-self-center space-x-2">
+              <Input className="w-4/5" type="query" placeholder="MATCH (n) RETURN n" />
+              <Button type="submit">Submit</Button>
+            </div>
+            <div className="row-span-8 justify-center items-center">
+              {/* <GraphBrowser host="localhost" port={5173} cypherQuery="MATCH (n) RETURN n LIMIT 25" /> */}
+            </div>
+
+          </div>
+        ) : null
+      }
+      {/* <ChatBot /> */}
     </>
   )
 }

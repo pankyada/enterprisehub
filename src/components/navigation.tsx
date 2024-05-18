@@ -52,7 +52,7 @@ import {
 //     },
 // ]
 
-export function Navigation({ selectedComponents }: { selectedComponents: any[] }) {
+export function Navigation({ selectedComponents, setApp }: { selectedComponents: any[], setApp: any }) {
 
     // console.log(selectedComponents)
     return (
@@ -89,10 +89,10 @@ export function Navigation({ selectedComponents }: { selectedComponents: any[] }
                                     >
                                         {/* <Icons.logo className="h-6 w-6" /> */}
                                         <div className="mb-2 mt-4 text-lg font-medium">
-                                            NFR Reporting
+                                            NFR Graph Reporting
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground">
-                                            Browse through our NFR reporting solution.
+                                            Browse through our NFR Graphs (relationships and nodes).
                                         </p>
                                     </a>
                                 </NavigationMenuLink>
@@ -118,7 +118,7 @@ export function Navigation({ selectedComponents }: { selectedComponents: any[] }
                     <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                             <li className="row-span-3">
-                                <NavigationMenuLink asChild>
+                                <NavigationMenuLink asChild onClick={setApp("Graph")}>
                                     <a
                                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                                         href="/"

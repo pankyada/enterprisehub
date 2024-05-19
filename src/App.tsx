@@ -1,19 +1,18 @@
-import './App.css'
-import './index.css'
+import './App.css';
+import './index.css';
 import { useState, useEffect } from 'react';
-import { Navigation } from './components/navigation'
-// import { Switch } from "@/components/ui/switch"
+import { Navigation } from './components/navigation';
 import { Checkbox } from './components/ui/checkbox';
 import GraphBrowser from './components/GraphBrowser';
 import { Input } from './components/ui/input';
 import { Button } from './components/ui/button';
-// import ChatBot from './components/ChatBot';
-
-
 
 function App() {
   const [isFirstTime, setIsFirstTime] = useState<boolean>(false);
   const [selectedComponents, setSelectedComponents] = useState<any[]>([]);
+  const [selectedApp, setSelectedApp] = useState<string>("");
+  const [queryInput, setQueryInput] = useState<string>(""); // State to manage the query input
+  const [cypherQuery, setCypherQuery] = useState<string>(""); // State to manage the cypher query
 
   const components: { title: string; href: string; section: string; description: string }[] = [
     {
@@ -68,7 +67,6 @@ function App() {
     }
   }, []);
 
-
   const [app, setApp] = useState<string>("");
 
   const handleSave = () => {
@@ -83,7 +81,15 @@ function App() {
     setSelectedComponents(newSelection);
   };
 
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // console.log(event.target.value);
+    setQueryInput(event.target.value);
+  };
 
+  const handleQuerySubmit = () => {
+    // console.log(queryInput);
+    setCypherQuery(queryInput);
+  };
 
   const firstTimeDialog = (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -93,7 +99,6 @@ function App() {
           {components.map((component, index) => (
             <div key={index} className="my-2 ml-4">
               <label className="inline-flex items-start">
-                {/* <input type="checkbox" */}
                 <Checkbox
                   checked={selectedComponents.some(comp => comp['title'] === component.title)}
                   onCheckedChange={() => handleComponentChange(component)}
@@ -109,27 +114,36 @@ function App() {
     </div>
   );
 
+  useEffect(() => {
+    console.log(selectedApp);
+  }, [selectedApp]);
+
   return (
     <>
       {isFirstTime && firstTimeDialog}
       <Navigation selectedComponents={selectedComponents} setApp={setApp} />
       {
         app === "Graph" ? (
-
           <div className='grid grid-rows-12 grid-flow-col h-lvh'>
             <h1 className="text-2xl font-bold text-center row-span-1">NFR Graph Reporting</h1>
             <div className="flex w-full items-center justify-self-center space-x-2">
-              <Input className="w-4/5" type="query" placeholder="MATCH (n) RETURN n" />
-              <Button type="submit">Submit</Button>
+              <Input
+                className="w-4/5"
+                type="query"
+                placeholder="MATCH (n) RETURN n"
+                value={queryInput}
+                onChange={handleQueryChange}
+              />
+              <Button type="submit" onClick={handleQuerySubmit}>Submit</Button>
             </div>
-            <div className="row-span-8 justify-center items-center">
-              {/* <GraphBrowser host="localhost" port={5173} cypherQuery="MATCH (n) RETURN n LIMIT 25" /> */}
-            </div>
-
+            {cypherQuery && ( // Conditionally render GraphBrowser only if cypherQuery is not empty
+              <div className="row-span-8 justify-center items-center">
+                <GraphBrowser host="localhost" port={5173} cypherQuery={cypherQuery} />
+              </div>
+            )}
           </div>
         ) : null
       }
-      {/* <ChatBot /> */}
     </>
   )
 }

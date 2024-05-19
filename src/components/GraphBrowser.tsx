@@ -8,30 +8,18 @@ interface GraphBrowserProps {
 
 const GraphBrowser: React.FC<GraphBrowserProps> = ({ host, port, cypherQuery }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [encodedQuery, setEncodedQuery] = React.useState<string>(() => cypherQuery);
 
     useEffect(() => {
-        const encodedQuery = encodeURIComponent(cypherQuery);
-        const url = `http://${host}:${port}/graphQuery.html`;
-
-        // const onLoad = () => {
-        //     if (iframeRef.current) {
-        //         const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-        //         if (iframeDocument) {
-        //             const connectButton = iframeDocument.querySelector<HTMLButtonElement>('[data-testid="connect"]');
-        //             if (connectButton) {
-        //                 connectButton.click();
-        //             } else {
-        //                 console.error('Connect button not found');
-        //             }
-        //         }
-        //     }
-        // };
-
+        console.log(cypherQuery);
+        setEncodedQuery(encodeURIComponent(cypherQuery));
+        console.log(encodedQuery);
+        const url = `http://${host}:${port}/graphQuery.html?query=${encodedQuery}`;
         if (iframeRef.current) {
             iframeRef.current.src = url;
             // iframeRef.current.onload = onLoad;
         }
-    }, [host, port, cypherQuery]);
+    }, [cypherQuery]);
 
     return (
 

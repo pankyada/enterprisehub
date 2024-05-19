@@ -10,7 +10,7 @@ import { Button } from './components/ui/button';
 function App() {
   const [isFirstTime, setIsFirstTime] = useState<boolean>(false);
   const [selectedComponents, setSelectedComponents] = useState<any[]>([]);
-  const [selectedApp, setSelectedApp] = useState<string>("");
+  // const [selectedApp, setSelectedApp] = useState<string>("");
   const [queryInput, setQueryInput] = useState<string>(""); // State to manage the query input
   const [cypherQuery, setCypherQuery] = useState<string>(""); // State to manage the cypher query
 
@@ -114,9 +114,9 @@ function App() {
     </div>
   );
 
-  useEffect(() => {
-    console.log(selectedApp);
-  }, [selectedApp]);
+  // useEffect(() => {
+  //   console.log(selectedApp);
+  // }, [selectedApp]);
 
   return (
     <>

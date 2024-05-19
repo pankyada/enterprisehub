@@ -11647,10 +11647,48 @@ function clsx() {
     (e = arguments[f2++]) && (t2 = r(e)) && (n2 && (n2 += " "), n2 += t2);
   return n2;
 }
+const falsyToString = (value) => typeof value === "boolean" ? "".concat(value) : value === 0 ? "0" : value;
 const cx = clsx;
 const cva = (base, config) => {
   return (props) => {
-    return cx(base, props === null || props === void 0 ? void 0 : props.class, props === null || props === void 0 ? void 0 : props.className);
+    var ref;
+    if ((config === null || config === void 0 ? void 0 : config.variants) == null)
+      return cx(base, props === null || props === void 0 ? void 0 : props.class, props === null || props === void 0 ? void 0 : props.className);
+    const { variants, defaultVariants } = config;
+    const getVariantClassNames = Object.keys(variants).map((variant) => {
+      const variantProp = props === null || props === void 0 ? void 0 : props[variant];
+      const defaultVariantProp = defaultVariants === null || defaultVariants === void 0 ? void 0 : defaultVariants[variant];
+      if (variantProp === null)
+        return null;
+      const variantKey = falsyToString(variantProp) || falsyToString(defaultVariantProp);
+      return variants[variant][variantKey];
+    });
+    const propsWithoutUndefined = props && Object.entries(props).reduce((acc, param) => {
+      let [key, value] = param;
+      if (value === void 0) {
+        return acc;
+      }
+      acc[key] = value;
+      return acc;
+    }, {});
+    const getCompoundVariantClassNames = config === null || config === void 0 ? void 0 : (ref = config.compoundVariants) === null || ref === void 0 ? void 0 : ref.reduce((acc, param1) => {
+      let { class: cvClass, className: cvClassName, ...compoundVariantOptions } = param1;
+      return Object.entries(compoundVariantOptions).every((param) => {
+        let [key, value] = param;
+        return Array.isArray(value) ? value.includes({
+          ...defaultVariants,
+          ...propsWithoutUndefined
+        }[key]) : {
+          ...defaultVariants,
+          ...propsWithoutUndefined
+        }[key] === value;
+      }) ? [
+        ...acc,
+        cvClass,
+        cvClassName
+      ] : acc;
+    }, []);
+    return cx(base, getVariantClassNames, getCompoundVariantClassNames, props === null || props === void 0 ? void 0 : props.class, props === null || props === void 0 ? void 0 : props.className);
   };
 };
 /**
@@ -11840,7 +11878,7 @@ const NavigationMenuIndicator = reactExports.forwardRef(({ className, ...props }
   }
 ));
 NavigationMenuIndicator.displayName = $322c88a641701f3b$export$adb584737d712b70.displayName;
-function Navigation({ selectedComponents }) {
+function Navigation({ selectedComponents, setApp }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenu, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(NavigationMenuList, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(NavigationMenuItem, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenuTrigger, { children: "Risk Links" }),
@@ -11860,8 +11898,8 @@ function Navigation({ selectedComponents }) {
             className: "flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md",
             href: "/",
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 mt-4 text-lg font-medium", children: "NFR Reporting" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm leading-tight text-muted-foreground", children: "Browse through our NFR reporting solution." })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 mt-4 text-lg font-medium", children: "NFR Graph Reporting" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm leading-tight text-muted-foreground", children: "Browse through our NFR Graphs (relationships and nodes)." })
             ]
           }
         ) }) }),
@@ -11883,7 +11921,7 @@ function Navigation({ selectedComponents }) {
     /* @__PURE__ */ jsxRuntimeExports.jsxs(NavigationMenuItem, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenuTrigger, { children: "Compliance Section" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenuContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "row-span-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenuLink, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "row-span-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavigationMenuLink, { asChild: true, onClick: setApp("Graph"), children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "a",
           {
             className: "flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md",
@@ -12126,9 +12164,90 @@ const Checkbox = reactExports.forwardRef(({ className, ...props }, ref) => /* @_
   }
 ));
 Checkbox.displayName = $e698a72e93240346$export$be92b6f5f03c0fe9.displayName;
+const GraphBrowser = ({ host, port, cypherQuery }) => {
+  const iframeRef = reactExports.useRef(null);
+  const [encodedQuery, setEncodedQuery] = React.useState(() => cypherQuery);
+  reactExports.useEffect(() => {
+    console.log(cypherQuery);
+    setEncodedQuery(encodeURIComponent(cypherQuery));
+    console.log(encodedQuery);
+    const url = `http://${host}:${port}/graphQuery.html?query=${encodedQuery}`;
+    if (iframeRef.current) {
+      iframeRef.current.src = url;
+    }
+  }, [cypherQuery]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "iframe",
+    {
+      ref: iframeRef,
+      title: "Neo4j Browser",
+      width: "100%",
+      height: "100%",
+      style: { border: "none", marginTop: "20px", borderRadius: "16px" }
+    }
+  );
+};
+const Input = reactExports.forwardRef(
+  ({ className, type, ...props }, ref) => {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        type,
+        className: cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        ),
+        ref,
+        ...props
+      }
+    );
+  }
+);
+Input.displayName = "Input";
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline"
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10"
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default"
+    }
+  }
+);
+const Button = reactExports.forwardRef(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? $5e63c961fc1ce211$export$8c6ed5c666ac1360 : "button";
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Comp,
+      {
+        className: cn(buttonVariants({ variant, size, className })),
+        ref,
+        ...props
+      }
+    );
+  }
+);
+Button.displayName = "Button";
 function App() {
   const [isFirstTime, setIsFirstTime] = reactExports.useState(false);
   const [selectedComponents, setSelectedComponents] = reactExports.useState([]);
+  const [queryInput, setQueryInput] = reactExports.useState("");
+  const [cypherQuery, setCypherQuery] = reactExports.useState("");
   const components = [
     {
       title: "My Tasks",
@@ -12175,6 +12294,7 @@ function App() {
       setSelectedComponents(JSON.parse(storedComponents));
     }
   }, []);
+  const [app, setApp] = reactExports.useState("");
   const handleSave = () => {
     localStorage.setItem("selectedComponents", JSON.stringify(selectedComponents));
     setIsFirstTime(false);
@@ -12182,6 +12302,12 @@ function App() {
   const handleComponentChange = (component) => {
     const newSelection = selectedComponents.filter((c) => c.title === component.title).length > 0 ? selectedComponents.filter((c) => c.title !== component.title) : [...selectedComponents, component];
     setSelectedComponents(newSelection);
+  };
+  const handleQueryChange = (event) => {
+    setQueryInput(event.target.value);
+  };
+  const handleQuerySubmit = () => {
+    setCypherQuery(queryInput);
   };
   const firstTimeDialog = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white p-4 rounded-lg ", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold", children: "Select the components you are interested in:" }),
@@ -12200,7 +12326,25 @@ function App() {
   ] }) });
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     isFirstTime && firstTimeDialog,
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Navigation, { selectedComponents })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Navigation, { selectedComponents, setApp }),
+    app === "Graph" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-rows-12 grid-flow-col h-lvh", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold text-center row-span-1", children: "NFR Graph Reporting" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex w-full items-center justify-self-center space-x-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Input,
+          {
+            className: "w-4/5",
+            type: "query",
+            placeholder: "MATCH (n) RETURN n",
+            value: queryInput,
+            onChange: handleQueryChange
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { type: "submit", onClick: handleQuerySubmit, children: "Submit" })
+      ] }),
+      cypherQuery && // Conditionally render GraphBrowser only if cypherQuery is not empty
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "row-span-8 justify-center items-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GraphBrowser, { host: "localhost", port: 5173, cypherQuery }) })
+    ] }) : null
   ] });
 }
 client.createRoot(document.getElementById("root")).render(
